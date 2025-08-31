@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Test - Image Sending</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .image-preview {
+            max-width: 300px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .log-entry.success { background: rgba(40, 167, 69, 0.1); }
+        .log-entry.error { background: rgba(220, 53, 69, 0.1); }
+        .log-entry.info { background: rgba(23, 162, 184, 0.1); }
+        .log-entry.warning { background: rgba(255, 193, 7, 0.1); }
+    </style>
+</head>
+<body>
+    <h1>🔧 Backend Test - Image Sending</h1>
+    <p>This page helps debug the image sending issue with your backend.</p>
+
+    <div class="test-section">
+        <h2>📸 Test Image Upload</h2>
+        <div class="upload-area" id="uploadArea">
+            <p>📁 Click to upload or drag & drop an image here</p>
+            <p><small>Supports: JPG, PNG, GIF (Max: 5MB)</small></p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div id="imagePreview" style="display: none;">
+            <h3>Preview:</h3>
+            <img id="previewImg" class="image-preview" alt="Preview">
+            <br>
+            <button onclick="removeImage()">🗑️ Remove Image</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Backend Configuration</h2>
+        <div>
+            <label for="backendUrl">Backend URL:</label>
+            <input type="text" id="backendUrl" value="http://localhost:3002/telegram/makePost" style="width: 100%; padding: 10px; margin: 10px 0;">
+        </div>
+        <div>
+            <label for="testMessage">Test Message:</label>
+            <textarea id="testMessage" rows="4" style="width: 100%; padding: 10px; margin: 10px 0;">📊 FOREX SIGNAL\n═══════════════════\n\n🎯 EURUSD (1H)\n🟢 LONG / BUY\n\n📈 ENTRY & EXIT:\nEntry: 1.0850\nStop Loss: 1.0820\n\n⚠️ Educational purposes only. Not financial advice.</textarea>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📤 Test Backend Connection</h2>
+        <button onclick="testBackendConnection()">🔗 Test Connection</button>
+        <button onclick="sendTextOnly()">📝 Send Text Only</button>
+        <button onclick="sendWithImage()">🖼️ Send with Image</button>
+        <button onclick="clearLogs()">🗑️ Clear Logs</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Request/Response Logs</h2>
+        <div id="logs" class="code-block">
+            <p>Click a test button to see logs...</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>💡 Troubleshooting Tips</h2>
+        <h3>Common Issues:</h3>
+        <ul>
+            <li><strong>Connection Refused:</strong> Backend not running on port 3002</li>
+            <li><strong>CORS Error:</strong> Backend needs CORS headers</li>
+            <li><strong>404 Error:</strong> Endpoint path incorrect</li>
+            <li><strong>Image Not Received:</strong> Check backend image handling</li>
+        </ul>
+        
+        <h3>Backend Requirements:</h3>
+        <div class="code-block">
+// Your backend should handle this structure:
+const { message, image, imageName, imageType } = req.body;
+
+if (image) {
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(image, 'base64');
+    
+    // Save image or send to Telegram
+    console.log('Received image:', imageName, imageType, imageBuffer.length);
+}
+
+// Always handle the message
+console.log('Received message:', message);
+        </div>
+    </div>
+
+    <script>
+        let currentImage = null;
+
+        // Setup drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#007bff';
+            uploadArea.style.background = '#e3f2fd';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ccc';
+            uploadArea.style.background = 'white';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+            uploadArea.style.background = 'white';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        function handleImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                addLog('Please select an image file', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                addLog('Image size must be less than 5MB', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = {
+                    file: file,
+                    dataUrl: e.target.result,
+                    base64: e.target.result.split(',')[1]
+                };
+                displayImagePreview();
+                addLog(`Image uploaded: ${file.name} (${(file.size/1024).toFixed(2)} KB)`, 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function displayImagePreview() {
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'block';
+            document.getElementById('previewImg').src = currentImage.dataUrl;
+        }
+
+        function removeImage() {
+            currentImage = null;
+            document.getElementById('uploadArea').style.display = 'block';
+            document.getElementById('imagePreview').style.display = 'none';
+            addLog('Image removed', 'info');
+        }
+
+        function addLog(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '<p>Logs cleared...</p>';
+        }
+
+        async function testBackendConnection() {
+            const url = document.getElementById('backendUrl').value;
+            addLog(`Testing connection to: ${url}`, 'info');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: 'Connection test',
+                        test: true 
+                    })
+                });
+
+                if (response.ok) {
+                    addLog('✅ Backend connection successful!', 'success');
+                    const result = await response.text();
+                    addLog(`Response: ${result}`, 'info');
+                } else {
+                    addLog(`❌ Backend error: ${response.status} ${response.statusText}`, 'error');
+                    const errorText = await response.text();
+                    addLog(`Error details: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function sendTextOnly() {
+            const url = document.getElementById('backendUrl').value;
+            const message = document.getElementById('testMessage').value;
+            
+            addLog('Sending text-only message...', 'info');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (response.ok) {
+                    addLog('✅ Text message sent successfully!', 'success');
+                    const result = await response.text();
+                    addLog(`Response: ${result}`, 'info');
+                } else {
+                    addLog(`❌ Error sending text: ${response.status}`, 'error');
+                    const errorText = await response.text();
+                    addLog(`Error details: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function sendWithImage() {
+            if (!currentImage) {
+                addLog('❌ No image selected!', 'error');
+                return;
+            }
+
+            const url = document.getElementById('backendUrl').value;
+            const message = document.getElementById('testMessage').value;
+            
+            addLog('Sending message with image...', 'info');
+            addLog(`Image: ${currentImage.file.name} (${(currentImage.file.size/1024).toFixed(2)} KB)`, 'info');
+            
+            const payload = {
+                message: message,
+                image: currentImage.base64,
+                imageName: currentImage.file.name,
+                imageType: currentImage.file.type
+            };
+
+            addLog(`Payload size: ${JSON.stringify(payload).length} characters`, 'info');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    addLog('✅ Message with image sent successfully!', 'success');
+                    const result = await response.text();
+                    addLog(`Response: ${result}`, 'info');
+                } else {
+                    addLog(`❌ Error sending with image: ${response.status}`, 'error');
+                    const errorText = await response.text();
+                    addLog(`Error details: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .image-preview {
+            max-width: 300px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #007bff;
+            background: #e3f2fd;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .error { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Image Upload Test</h1>
+    <p>This page demonstrates how the image upload functionality works in ForexSignal Pro.</p>
+
+    <div class="test-section">
+        <h2>📸 Test Image Upload</h2>
+        <div class="upload-area" id="uploadArea">
+            <p>📁 Click to upload or drag & drop an image here</p>
+            <p><small>Supports: JPG, PNG, GIF (Max: 5MB)</small></p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div id="imagePreview" style="display: none;">
+            <h3>Preview:</h3>
+            <img id="previewImg" class="image-preview" alt="Preview">
+            <br>
+            <button onclick="removeImage()">🗑️ Remove Image</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Image Data</h2>
+        <div id="imageInfo">
+            <p>Upload an image to see the data that will be sent to your backend.</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📤 Backend Payload</h2>
+        <p>When you send content with an image, this is what gets sent to your backend:</p>
+        <div class="code-block" id="payloadDisplay">
+            <p>Upload an image to see the payload structure...</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>💡 How It Works</h2>
+        <h3>1. Image Upload</h3>
+        <ul>
+            <li>Drag & drop or click to select image</li>
+            <li>File validation (type and size)</li>
+            <li>Base64 encoding for transmission</li>
+        </ul>
+
+        <h3>2. Backend Integration</h3>
+        <ul>
+            <li>Image data sent as base64 string</li>
+            <li>Includes filename and MIME type</li>
+            <li>Your backend can save and attach to Telegram</li>
+        </ul>
+
+        <h3>3. Telegram Display</h3>
+        <ul>
+            <li>Images display beautifully in Telegram</li>
+            <li>Charts and screenshots enhance analysis</li>
+            <li>Professional appearance for your channel</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>⚙️ Backend Code Example</h2>
+        <p>Here's how your backend should handle the image data:</p>
+        <div class="code-block">
+const { message, image, imageName, imageType } = req.body;
+
+if (image) {
+    // Save image to disk or cloud storage
+    const imageBuffer = Buffer.from(image, 'base64');
+    
+    // Send to Telegram with image
+    await bot.sendPhoto(chatId, imageBuffer, {
+        caption: message,
+        parse_mode: 'HTML'
+    });
+} else {
+    // Send text-only message
+    await bot.sendMessage(chatId, message, {
+        parse_mode: 'HTML'
+    });
+}
+        </div>
+    </div>
+
+    <script>
+        let currentImage = null;
+
+        // Setup drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        function handleImageUpload(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            // Validate file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size must be less than 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = {
+                    file: file,
+                    dataUrl: e.target.result,
+                    base64: e.target.result.split(',')[1]
+                };
+                displayImagePreview();
+                updateImageInfo();
+                updatePayloadDisplay();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function displayImagePreview() {
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'block';
+            document.getElementById('previewImg').src = currentImage.dataUrl;
+        }
+
+        function removeImage() {
+            currentImage = null;
+            document.getElementById('uploadArea').style.display = 'block';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageInfo').innerHTML = '<p>Upload an image to see the data that will be sent to your backend.</p>';
+            document.getElementById('payloadDisplay').innerHTML = '<p>Upload an image to see the payload structure...</p>';
+        }
+
+        function updateImageInfo() {
+            const info = document.getElementById('imageInfo');
+            info.innerHTML = `
+                <h3>📊 Image Details:</h3>
+                <p><strong>Name:</strong> ${currentImage.file.name}</p>
+                <p><strong>Type:</strong> ${currentImage.file.type}</p>
+                <p><strong>Size:</strong> ${(currentImage.file.size / 1024).toFixed(2)} KB</p>
+                <p><strong>Base64 Length:</strong> ${currentImage.base64.length} characters</p>
+            `;
+        }
+
+        function updatePayloadDisplay() {
+            const payload = {
+                message: "📊 FOREX SIGNAL\n═══════════════════\n\n🎯 EURUSD (1H)\n🟢 LONG / BUY\n\n📈 ENTRY & EXIT:\nEntry: 1.0850\nStop Loss: 1.0820\n\n⚠️ Educational purposes only. Not financial advice.",
+                image: currentImage.base64,
+                imageName: currentImage.file.name,
+                imageType: currentImage.file.type
+            };
+
+            const display = document.getElementById('payloadDisplay');
+            display.innerHTML = `<pre>${JSON.stringify(payload, null, 2)}</pre>`;
+        }
+    </script>
+</body>
+</html>

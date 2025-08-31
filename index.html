@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>House Content Creator - Telegram</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <i class="fas fa-home"></i>
+      </div>
+      <h1>House Content Creator</h1>
+      <p class="subtitle">Create professional housing content for Telegram with standardized formats</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Content Type Selector -->
+      <div class="content-type-selector">
+        <button class="type-btn active" data-type="listing">
+          <i class="fas fa-home"></i>
+          <span>Property Listing</span>
+        </button>
+        <button class="type-btn" data-type="market">
+          <i class="fas fa-chart-line"></i>
+          <span>Market Update</span>
+        </button>
+        <button class="type-btn" data-type="tips">
+          <i class="fas fa-lightbulb"></i>
+          <span>Buying Tips</span>
+        </button>
+        <button class="type-btn" data-type="news">
+          <i class="fas fa-newspaper"></i>
+          <span>Industry News</span>
+        </button>
+      </div>
+
+      <!-- Form Container -->
+      <div class="form-container">
+        <!-- Property Listing Form -->
+        <form id="listingForm" class="content-form active">
+          <div class="form-section">
+            <h3>🏠 Property Details</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="listingType">Property Type</label>
+                <select id="listingType" required>
+                  <option value="">Select type</option>
+                  <option value="House">House</option>
+                  <option value="Apartment">Apartment</option>
+                  <option value="Condo">Condo</option>
+                  <option value="Townhouse">Townhouse</option>
+                  <option value="Land">Land</option>
+                  <option value="Commercial">Commercial</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listingStatus">Status</label>
+                <select id="listingStatus" required>
+                  <option value="">Select status</option>
+                  <option value="For Sale">For Sale</option>
+                  <option value="For Rent">For Rent</option>
+                  <option value="Sold">Sold</option>
+                  <option value="Under Contract">Under Contract</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listingPrice">Price</label>
+                <input type="text" id="listingPrice" placeholder="e.g., $450,000" required>
+              </div>
+              <div class="form-group">
+                <label for="listingBeds">Bedrooms</label>
+                <select id="listingBeds" required>
+                  <option value="">Select</option>
+                  <option value="Studio">Studio</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5+">5+</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listingBaths">Bathrooms</label>
+                <select id="listingBaths" required>
+                  <option value="">Select</option>
+                  <option value="1">1</option>
+                  <option value="1.5">1.5</option>
+                  <option value="2">2</option>
+                  <option value="2.5">2.5</option>
+                  <option value="3">3</option>
+                  <option value="3+">3+</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="listingSqft">Square Feet</label>
+                <input type="text" id="listingSqft" placeholder="e.g., 1,200 sqft">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📍 Location & Features</h3>
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label for="listingAddress">Address</label>
+                <input type="text" id="listingAddress" placeholder="Street address" required>
+              </div>
+              <div class="form-group">
+                <label for="listingCity">City</label>
+                <input type="text" id="listingCity" placeholder="City" required>
+              </div>
+              <div class="form-group">
+                <label for="listingState">State</label>
+                <input type="text" id="listingState" placeholder="State" required>
+              </div>
+              <div class="form-group">
+                <label for="listingZip">ZIP Code</label>
+                <input type="text" id="listingZip" placeholder="ZIP" required>
+              </div>
+              <div class="form-group full-width">
+                <label for="listingFeatures">Key Features</label>
+                <textarea id="listingFeatures" rows="3" placeholder="List key features: Updated kitchen, Hardwood floors, Large backyard, etc."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📝 Description</h3>
+            <div class="form-group">
+              <label for="listingDescription">Property Description</label>
+              <textarea id="listingDescription" rows="4" placeholder="Describe the property, highlight unique selling points, mention any recent updates or renovations..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="listingHighlights">Highlights</label>
+              <textarea id="listingHighlights" rows="3" placeholder="3-5 key highlights that make this property special"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>👤 Contact Info</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="listingAgent">Agent Name</label>
+                <input type="text" id="listingAgent" placeholder="Your name" required>
+              </div>
+              <div class="form-group">
+                <label for="listingPhone">Phone</label>
+                <input type="tel" id="listingPhone" placeholder="Phone number">
+              </div>
+              <div class="form-group">
+                <label for="listingEmail">Email</label>
+                <input type="email" id="listingEmail" placeholder="Email address">
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Market Update Form -->
+        <form id="marketForm" class="content-form">
+          <div class="form-section">
+            <h3>📊 Market Data</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="marketArea">Market Area</label>
+                <input type="text" id="marketArea" placeholder="e.g., Downtown, Suburbs, etc." required>
+              </div>
+              <div class="form-group">
+                <label for="marketPeriod">Time Period</label>
+                <select id="marketPeriod" required>
+                  <option value="">Select period</option>
+                  <option value="This Month">This Month</option>
+                  <option value="Last 3 Months">Last 3 Months</option>
+                  <option value="Last 6 Months">Last 6 Months</option>
+                  <option value="This Year">This Year</option>
+                  <option value="Last Year">Last Year</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="marketType">Property Type</label>
+                <select id="marketType" required>
+                  <option value="">Select type</option>
+                  <option value="All Properties">All Properties</option>
+                  <option value="Houses">Houses</option>
+                  <option value="Apartments">Apartments</option>
+                  <option value="Condos">Condos</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="marketTrend">Market Trend</label>
+                <select id="marketTrend" required>
+                  <option value="">Select trend</option>
+                  <option value="Rising">Rising</option>
+                  <option value="Stable">Stable</option>
+                  <option value="Declining">Declining</option>
+                  <option value="Mixed">Mixed</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📈 Key Statistics</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="marketAvgPrice">Average Price</label>
+                <input type="text" id="marketAvgPrice" placeholder="e.g., $425,000" required>
+              </div>
+              <div class="form-group">
+                <label for="marketDaysOnMarket">Days on Market</label>
+                <input type="text" id="marketDaysOnMarket" placeholder="e.g., 45 days" required>
+              </div>
+              <div class="form-group">
+                <label for="marketInventory">Inventory Level</label>
+                <select id="marketInventory" required>
+                  <option value="">Select level</option>
+                  <option value="Low">Low (Seller's Market)</option>
+                  <option value="Balanced">Balanced</option>
+                  <option value="High">High (Buyer's Market)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="marketPriceChange">Price Change</label>
+                <input type="text" id="marketPriceChange" placeholder="e.g., +5.2% or -2.1%">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📝 Analysis & Insights</h3>
+            <div class="form-group">
+              <label for="marketTitle">Update Title</label>
+              <input type="text" id="marketTitle" placeholder="Brief, descriptive title" required>
+            </div>
+            <div class="form-group">
+              <label for="marketAnalysis">Market Analysis</label>
+              <textarea id="marketAnalysis" rows="5" placeholder="Provide your market insights, what's driving the trends, and what buyers/sellers should know..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="marketOutlook">Market Outlook</label>
+              <textarea id="marketOutlook" rows="3" placeholder="What to expect in the coming months..." required></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>👤 Author Info</h3>
+            <div class="form-group">
+              <label for="marketAuthor">Author</label>
+              <input type="text" id="marketAuthor" placeholder="Your name" required>
+            </div>
+          </div>
+        </form>
+
+        <!-- Buying Tips Form -->
+        <form id="tipsForm" class="content-form">
+          <div class="form-section">
+            <h3>💡 Tip Details</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="tipsCategory">Category</label>
+                <select id="tipsCategory" required>
+                  <option value="">Select category</option>
+                  <option value="First-Time Buyers">First-Time Buyers</option>
+                  <option value="Financing">Financing</option>
+                  <option value="Negotiation">Negotiation</option>
+                  <option value="Home Inspection">Home Inspection</option>
+                  <option value="Closing Process">Closing Process</option>
+                  <option value="Investment">Investment</option>
+                  <option value="Market Timing">Market Timing</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="tipsLevel">Experience Level</label>
+                <select id="tipsLevel" required>
+                  <option value="">Select level</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="tipsAuthor">Author</label>
+                <input type="text" id="tipsAuthor" placeholder="Your name" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📝 Content</h3>
+            <div class="form-group">
+              <label for="tipsTitle">Tip Title</label>
+              <input type="text" id="tipsTitle" placeholder="Clear, actionable title" required>
+            </div>
+            <div class="form-group">
+              <label for="tipsContent">Tip Content</label>
+              <textarea id="tipsContent" rows="6" placeholder="Write your tip here. Be practical, actionable, and helpful..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="tipsActionSteps">Action Steps</label>
+              <textarea id="tipsActionSteps" rows="3" placeholder="List 3-5 specific steps readers can take..." required></textarea>
+            </div>
+          </div>
+        </form>
+
+        <!-- Industry News Form -->
+        <form id="newsForm" class="content-form">
+          <div class="form-section">
+            <h3>📰 News Details</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="newsCategory">News Category</label>
+                <select id="newsCategory" required>
+                  <option value="">Select category</option>
+                  <option value="Market Trends">Market Trends</option>
+                  <option value="Interest Rates">Interest Rates</option>
+                  <option value="Policy Changes">Policy Changes</option>
+                  <option value="New Developments">New Developments</option>
+                  <option value="Economic Impact">Economic Impact</option>
+                  <option value="Technology">Technology</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="newsImpact">Market Impact</label>
+                <select id="newsImpact" required>
+                  <option value="">Select impact</option>
+                  <option value="Positive">Positive</option>
+                  <option value="Neutral">Neutral</option>
+                  <option value="Negative">Negative</option>
+                  <option value="Mixed">Mixed</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="newsAuthor">Author</label>
+                <input type="text" id="newsAuthor" placeholder="Your name" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📝 News Content</h3>
+            <div class="form-group">
+              <label for="newsTitle">News Title</label>
+              <input type="text" id="newsTitle" placeholder="Clear, newsworthy title" required>
+            </div>
+            <div class="form-group">
+              <label for="newsSummary">Summary</label>
+              <textarea id="newsSummary" rows="3" placeholder="Brief summary of the news (2-3 sentences)" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="newsDetails">Details</label>
+              <textarea id="newsDetails" rows="5" placeholder="Provide more details, context, and implications..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="newsTakeaway">Key Takeaway</label>
+              <textarea id="newsTakeaway" rows="2" placeholder="What should readers remember or do with this information?" required></textarea>
+            </div>
+          </div>
+        </form>
+
+        <!-- Image Upload Section -->
+        <div class="form-section image-section">
+          <h3>📸 Attach Images</h3>
+          <div class="image-upload-container">
+            <div class="image-upload-area" id="imageUploadArea">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Click to upload or drag & drop</p>
+              <span class="image-hint">Supports: JPG, PNG, GIF (Max: 5MB)</span>
+              <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+            </div>
+            <div class="image-preview" id="imagePreview" style="display: none;">
+              <img id="previewImage" alt="Preview">
+              <button type="button" class="remove-image" id="removeImage">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="btnPreview" class="btn btn-primary">
+          <i class="fas fa-eye"></i> Preview
+        </button>
+        <button id="btnCopy" class="btn btn-info">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+        <button id="btnSave" class="btn btn-warning">
+          <i class="fas fa-save"></i> Save Template
+        </button>
+        <button id="btnSend" class="btn btn-success">
+          <i class="fas fa-paper-plane"></i> Send to Telegram
+        </button>
+        <button id="btnClear" class="btn btn-danger">
+          <i class="fas fa-trash"></i> Clear
+        </button>
+      </div>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar">
+      <!-- Preview Panel -->
+      <div class="preview-panel">
+        <div class="preview-header">
+          <h3>Preview</h3>
+          <span class="preview-type" id="previewType">Listing</span>
+        </div>
+        <div class="preview-content" id="previewContent">
+          <div class="preview-placeholder">
+            <i class="fas fa-eye"></i>
+            <p>Click "Preview" to see your content</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Templates Panel -->
+      <div class="templates-panel">
+        <div class="panel-header">
+          <h3>💾 Saved Templates</h3>
+          <i class="fas fa-save"></i>
+        </div>
+        <div class="templates-content" id="templatesContainer">
+          <div class="templates-placeholder">
+            <i class="fas fa-save"></i>
+            <p>Save your favorite content as templates</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Panel -->
+      <div class="stats-panel">
+        <div class="panel-header">
+          <h3>📊 Quick Stats</h3>
+          <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="stats-content" id="statsContent">
+          <div class="stats-placeholder">
+            <i class="fas fa-chart-bar"></i>
+            <p>Content statistics will appear here</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
