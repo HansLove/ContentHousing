@@ -1,22 +1,27 @@
-# House Content Creator - Telegram
+# Telegram Content Creator - Multi-Purpose Content Tool
 
-A professional, user-friendly tool for creating standardized housing content for Telegram channels. This tool helps real estate professionals and content creators maintain consistent formatting and professional appearance across all their housing-related posts.
+A professional, user-friendly tool for creating standardized content for Telegram channels. This tool helps teams and content creators maintain consistent formatting and professional appearance across all their posts, including real estate, general updates, announcements, and educational content.
 
 ## ✨ Features
 
-### 🏠 Content Types
+### 📝 Content Types
+- **General Posts** - Create flexible content for any topic with customizable formatting
 - **Property Listings** - Create detailed property advertisements with standardized format
 - **Market Updates** - Share market trends, statistics, and analysis
 - **Buying Tips** - Provide educational content for homebuyers
 - **Industry News** - Share relevant real estate industry updates
+- **Announcements** - Create priority-based announcements with action items
+- **Educational Content** - Develop structured educational posts with key takeaways
 
 ### 🎯 Key Benefits
 - **Standardized Formatting** - Consistent structure across all content types
 - **Professional Appearance** - Clean, emoji-enhanced formatting for Telegram
 - **Template System** - Save and reuse your favorite content formats
-- **Image Support** - Attach property photos and charts
+- **Image Support** - Attach photos, charts, and visual content
 - **Real-time Preview** - See exactly how your content will look before posting
 - **Statistics Tracking** - Monitor your content creation activity
+- **URL Description Reader** - Automatically load content from URL parameters
+- **Multi-Purpose Design** - Support for various content types beyond real estate
 
 ## 🚀 Getting Started
 
@@ -32,18 +37,24 @@ A professional, user-friendly tool for creating standardized housing content for
 ## 📱 How to Use
 
 ### 1. Choose Content Type
-Select from four main content categories:
+Select from seven main content categories:
+- **General Post** - For flexible content on any topic
 - **Property Listing** - For individual property advertisements
 - **Market Update** - For market analysis and trends
 - **Buying Tips** - For educational content
 - **Industry News** - For industry updates and news
+- **Announcement** - For priority-based announcements
+- **Educational Content** - For structured learning content
 
 ### 2. Fill Out the Form
 Each content type has specific fields designed for that content:
+- **General Posts**: Title, category, content, author, hashtags
 - **Property Listings**: Property details, location, features, description, contact info
 - **Market Updates**: Market data, statistics, analysis, outlook
 - **Buying Tips**: Category, level, content, action steps
 - **Industry News**: Category, impact, summary, details, key takeaways
+- **Announcements**: Title, priority, content, action items, author
+- **Educational Content**: Topic, level, title, content, key points, author
 
 ### 3. Preview Your Content
 Click the "Preview" button to see exactly how your content will appear in Telegram
@@ -54,7 +65,13 @@ Click the "Preview" button to see exactly how your content will appear in Telegr
 - **Save Template**: Save your content as a reusable template
 
 ### 5. Attach Images
-Drag and drop or click to upload property photos, charts, or other relevant images
+Drag and drop or click to upload photos, charts, or other relevant images
+
+### 6. URL Description Reader
+The tool automatically reads URL parameters to help with content creation:
+- Add `?description=Your content here` to pre-populate description fields
+- Add `?url=source-url` to track content sources
+- Perfect for integrating with other tools and workflows
 
 ## 🎨 Content Formatting
 

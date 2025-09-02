@@ -1,25 +1,29 @@
-// House Content Creator - Telegram
-class HouseContentCreator {
+// Telegram Content Creator - Multi-Purpose Content Creation Tool
+class TelegramContentCreator {
   constructor() {
-    this.currentType = 'listing';
+    this.currentType = 'general';
     this.backendUrl = 'http://localhost:3002/telegram/makePost';
     this.uploadedImage = null;
-    this.templates = JSON.parse(localStorage.getItem('houseTemplates') || '[]');
+    this.templates = JSON.parse(localStorage.getItem('telegramTemplates') || '[]');
     this.stats = {
       totalPosts: 0,
-      listings: 0,
-      marketUpdates: 0,
+      general: 0,
+      listing: 0,
+      market: 0,
       tips: 0,
-      news: 0
+      news: 0,
+      announcement: 0,
+      educational: 0
     };
     this.init();
   }
 
   init() {
     this.setupEventListeners();
-    this.showForm('listing');
+    this.showForm('general');
     this.loadTemplates();
     this.updateStats();
+    this.setupUrlDescriptionReader();
   }
 
   setupEventListeners() {
@@ -147,12 +151,40 @@ class HouseContentCreator {
 
   getTypeDisplayName(type) {
     const names = {
+      'general': 'General Post',
       'listing': 'Property Listing',
       'market': 'Market Update',
       'tips': 'Buying Tips',
-      'news': 'Industry News'
+      'news': 'Industry News',
+      'announcement': 'Announcement',
+      'educational': 'Educational Content'
     };
     return names[type] || type;
+  }
+
+  setupUrlDescriptionReader() {
+    // Read URL parameters for description
+    const urlParams = new URLSearchParams(window.location.search);
+    const description = urlParams.get("description");
+    const url = urlParams.get("url");
+
+    if (description) {
+      // Try to populate description in the current form
+      const descriptionField = document.getElementById(`${this.currentType}Description`) || 
+                              document.getElementById(`${this.currentType}Content`) ||
+                              document.getElementById(`${this.currentType}Summary`);
+      
+      if (descriptionField) {
+        descriptionField.value = description;
+        this.showToast('✅ Description loaded from URL', 'success');
+      }
+    }
+
+    if (url) {
+      // Store URL for reference
+      this.sourceUrl = url;
+      this.showToast('✅ Source URL detected', 'info');
+    }
   }
 
   showForm(type) {
@@ -172,6 +204,9 @@ class HouseContentCreator {
     let previewContent = '';
     
     switch (this.currentType) {
+      case 'general':
+        previewContent = this.generateGeneralPreview();
+        break;
       case 'listing':
         previewContent = this.generateListingPreview();
         break;
@@ -184,11 +219,114 @@ class HouseContentCreator {
       case 'news':
         previewContent = this.generateNewsPreview();
         break;
+      case 'announcement':
+        previewContent = this.generateAnnouncementPreview();
+        break;
+      case 'educational':
+        previewContent = this.generateEducationalPreview();
+        break;
     }
 
     if (previewContent) {
       this.displayPreview(previewContent);
     }
+  }
+
+  generateGeneralPreview() {
+    const title = document.getElementById('generalTitle').value;
+    const content = document.getElementById('generalContent').value;
+    const category = document.getElementById('generalCategory').value;
+    const author = document.getElementById('generalAuthor').value;
+    const hashtags = document.getElementById('generalHashtags').value;
+
+    if (!title || !content || !author) {
+      this.showToast('Please fill in all required fields', 'warning');
+      return '';
+    }
+
+    let preview = `📢 ${title}\n`;
+    preview += `═══════════════════\n\n`;
+    
+    if (category) {
+      preview += `🏷️ Category: ${category}\n\n`;
+    }
+    
+    preview += `${content}\n\n`;
+    
+    if (hashtags) {
+      preview += `#${hashtags.replace(/\s+/g, ' #')}`;
+    } else {
+      preview += `#General #Update`;
+    }
+
+    return preview;
+  }
+
+  generateAnnouncementPreview() {
+    const title = document.getElementById('announcementTitle').value;
+    const content = document.getElementById('announcementContent').value;
+    const priority = document.getElementById('announcementPriority').value;
+    const author = document.getElementById('announcementAuthor').value;
+    const action = document.getElementById('announcementAction').value;
+
+    if (!title || !content || !author) {
+      this.showToast('Please fill in all required fields', 'warning');
+      return '';
+    }
+
+    const priorityEmoji = priority === 'High' ? '🚨' : priority === 'Medium' ? '📢' : '📋';
+
+    let preview = `${priorityEmoji} ANNOUNCEMENT\n`;
+    preview += `═══════════════════\n\n`;
+    preview += `📝 ${title}\n\n`;
+    preview += `${content}\n\n`;
+    
+    if (action) {
+      preview += `🎯 ACTION REQUIRED:\n`;
+      preview += `${action}\n\n`;
+    }
+    
+    preview += `👤 ${author}\n`;
+    preview += `═══════════════════\n`;
+    preview += `📢 #Announcement #${priority}`;
+
+    return preview;
+  }
+
+  generateEducationalPreview() {
+    const topic = document.getElementById('educationalTopic').value;
+    const level = document.getElementById('educationalLevel').value;
+    const title = document.getElementById('educationalTitle').value;
+    const content = document.getElementById('educationalContent').value;
+    const keyPoints = document.getElementById('educationalKeyPoints').value;
+    const author = document.getElementById('educationalAuthor').value;
+
+    if (!topic || !level || !title || !content || !keyPoints || !author) {
+      this.showToast('Please fill in all required fields', 'warning');
+      return '';
+    }
+
+    const levelEmoji = level === 'Beginner' ? '🟢' : level === 'Intermediate' ? '🟡' : '🔴';
+
+    let preview = `📚 EDUCATIONAL CONTENT\n`;
+    preview += `═══════════════════\n\n`;
+    preview += `🎯 Topic: ${topic}\n`;
+    preview += `${levelEmoji} Level: ${level}\n\n`;
+    
+    preview += `📖 ${title}\n`;
+    preview += `═══════════════════\n\n`;
+    
+    preview += `💡 CONTENT:\n`;
+    preview += `${content}\n\n`;
+    
+    preview += `🔑 KEY POINTS:\n`;
+    preview += `${keyPoints}\n\n`;
+    
+    preview += `👤 ${author}\n`;
+    preview += `═══════════════════\n`;
+    preview += `📚 #Education #${topic.replace(/\s+/g, '')} #Learning`;
+
+    return preview;
   }
 
   generateListingPreview() {
@@ -406,6 +544,9 @@ class HouseContentCreator {
     let content = '';
     
     switch (this.currentType) {
+      case 'general':
+        content = this.generateGeneralPreview();
+        break;
       case 'listing':
         content = this.generateListingPreview();
         break;
@@ -417,6 +558,12 @@ class HouseContentCreator {
         break;
       case 'news':
         content = this.generateNewsPreview();
+        break;
+      case 'announcement':
+        content = this.generateAnnouncementPreview();
+        break;
+      case 'educational':
+        content = this.generateEducationalPreview();
         break;
     }
 
@@ -445,6 +592,9 @@ class HouseContentCreator {
     let content = '';
     
     switch (this.currentType) {
+      case 'general':
+        content = this.generateGeneralPreview();
+        break;
       case 'listing':
         content = this.generateListingPreview();
         break;
@@ -456,6 +606,12 @@ class HouseContentCreator {
         break;
       case 'news':
         content = this.generateNewsPreview();
+        break;
+      case 'announcement':
+        content = this.generateAnnouncementPreview();
+        break;
+      case 'educational':
+        content = this.generateEducationalPreview();
         break;
     }
 
@@ -475,7 +631,7 @@ class HouseContentCreator {
     };
 
     this.templates.push(template);
-    localStorage.setItem('houseTemplates', JSON.stringify(this.templates));
+    localStorage.setItem('telegramTemplates', JSON.stringify(this.templates));
     this.loadTemplates();
     this.showToast('✅ Template saved successfully!', 'success');
   }
@@ -500,9 +656,9 @@ class HouseContentCreator {
           </div>
           <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem; line-height: 1.4;">${template.content.substring(0, 100)}...</div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button onclick="houseContentCreator.loadTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s ease;">Load</button>
-            <button onclick="houseContentCreator.copyTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--success); color: white; transition: all 0.2s ease;">Copy</button>
-            <button onclick="houseContentCreator.deleteTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--danger); color: white; transition: all 0.2s ease;">Delete</button>
+            <button onclick="telegramContentCreator.loadTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s ease;">Load</button>
+            <button onclick="telegramContentCreator.copyTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--success); color: white; transition: all 0.2s ease;">Copy</button>
+            <button onclick="telegramContentCreator.deleteTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--danger); color: white; transition: all 0.2s ease;">Delete</button>
           </div>
         </div>
       `;
@@ -534,7 +690,7 @@ class HouseContentCreator {
   deleteTemplate(id) {
     if (confirm('Are you sure you want to delete this template?')) {
       this.templates = this.templates.filter(t => t.id !== id);
-      localStorage.setItem('houseTemplates', JSON.stringify(this.templates));
+      localStorage.setItem('telegramTemplates', JSON.stringify(this.templates));
       this.loadTemplates();
       this.showToast('✅ Template deleted!', 'success');
     }
@@ -560,10 +716,13 @@ class HouseContentCreator {
         </div>
         <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: 0.75rem; border: 1px solid var(--border);">
           <div style="font-size: 0.9rem; color: var(--text-muted);">
-            <div>🏠 Listings: ${this.stats.listings}</div>
-            <div>📊 Market Updates: ${this.stats.marketUpdates}</div>
+            <div>📢 General: ${this.stats.general}</div>
+            <div>🏠 Listings: ${this.stats.listing}</div>
+            <div>📊 Market Updates: ${this.stats.market}</div>
             <div>💡 Tips: ${this.stats.tips}</div>
             <div>📰 News: ${this.stats.news}</div>
+            <div>📢 Announcements: ${this.stats.announcement}</div>
+            <div>📚 Educational: ${this.stats.educational}</div>
           </div>
         </div>
       </div>
@@ -575,6 +734,9 @@ class HouseContentCreator {
     let message = '';
     
     switch (this.currentType) {
+      case 'general':
+        message = this.generateGeneralPreview();
+        break;
       case 'listing':
         message = this.generateListingPreview();
         break;
@@ -586,6 +748,12 @@ class HouseContentCreator {
         break;
       case 'news':
         message = this.generateNewsPreview();
+        break;
+      case 'announcement':
+        message = this.generateAnnouncementPreview();
+        break;
+      case 'educational':
+        message = this.generateEducationalPreview();
         break;
     }
 
@@ -626,10 +794,13 @@ class HouseContentCreator {
         // Update stats
         this.stats.totalPosts++;
         switch (this.currentType) {
-          case 'listing': this.stats.listings++; break;
-          case 'market': this.stats.marketUpdates++; break;
+          case 'general': this.stats.general++; break;
+          case 'listing': this.stats.listing++; break;
+          case 'market': this.stats.market++; break;
           case 'tips': this.stats.tips++; break;
           case 'news': this.stats.news++; break;
+          case 'announcement': this.stats.announcement++; break;
+          case 'educational': this.stats.educational++; break;
         }
         this.updateStats();
       } else {
@@ -696,9 +867,9 @@ class HouseContentCreator {
 }
 
 // Initialize the application when DOM is loaded
-let houseContentCreator;
+let telegramContentCreator;
 document.addEventListener('DOMContentLoaded', () => {
-  houseContentCreator = new HouseContentCreator();
+  telegramContentCreator = new TelegramContentCreator();
 });
 
 // Add some sample data for testing (optional)
