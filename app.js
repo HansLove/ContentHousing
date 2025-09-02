@@ -724,3 +724,83 @@ function populateSampleData() {
 
 // Uncomment the line below to populate sample data for testing
 // populateSampleData();
+
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Read URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const description = urlParams.get("description");
+
+  // 2. Set the description field if the parameter exists
+  if (description) {
+    const descriptionField = document.getElementById("listingDescription");
+    if (descriptionField) {
+      descriptionField.value = description;
+    }
+  }
+
+  // 3. Handle image upload preview
+  const imageUpload = document.getElementById("imageUpload");
+  const imagePreview = document.getElementById("imagePreview");
+  const previewImage = document.getElementById("previewImage");
+  const removeImage = document.getElementById("removeImage");
+
+  if (imageUpload && imagePreview && previewImage && removeImage) {
+    imageUpload.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImage.src = e.target.result;
+          imagePreview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    removeImage.addEventListener("click", () => {
+      imageUpload.value = "";
+      imagePreview.style.display = "none";
+      previewImage.src = "";
+    });
+  }
+
+  // 4. Send to Telegram (example implementation)
+  const sendButton = document.getElementById("btnSend");
+  if (sendButton) {
+    sendButton.addEventListener("click", () => {
+      const description = document.getElementById("listingDescription").value;
+      const imageFile = imageUpload.files[0];
+
+      if (!description) {
+        alert("Please add a description before sending.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("description", description);
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      // Replace with your Telegram bot API endpoint
+      const telegramApiUrl = "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage";
+
+      fetch(telegramApiUrl, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.ok) {
+            alert("Content sent to Telegram successfully!");
+          } else {
+            alert("Failed to send content to Telegram.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred while sending content.");
+        });
+    });
+  }
+});
