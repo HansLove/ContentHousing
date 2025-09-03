@@ -1,12 +1,40 @@
-// Telegram Content Creator - Multi-Purpose Content Creation Tool
-class TelegramContentCreator {
+// Cache Manager for handling all storage operations
+class CacheManager {
   constructor() {
-    this.currentType = 'general';
-    // this.backendUrl = 'http://localhost:3002/telegram/makePost';
-    this.backendUrl = 'https://taloon-studio-backoffice-23773ec9ff31.herokuapp.com/telegram/makePost';
-    this.uploadedImage = null;
-    this.templates = JSON.parse(localStorage.getItem('telegramTemplates') || '[]');
-    this.stats = {
+    this.storageKeys = {
+      templates: 'telegramTemplates',
+      stats: 'telegramStats',
+      formData: 'telegramFormData',
+      settings: 'telegramSettings'
+    };
+  }
+
+  // Template management
+  getTemplates() {
+    return JSON.parse(localStorage.getItem(this.storageKeys.templates) || '[]');
+  }
+
+  saveTemplates(templates) {
+    localStorage.setItem(this.storageKeys.templates, JSON.stringify(templates));
+  }
+
+  addTemplate(template) {
+    const templates = this.getTemplates();
+    templates.push(template);
+    this.saveTemplates(templates);
+    return templates;
+  }
+
+  deleteTemplate(id) {
+    const templates = this.getTemplates();
+    const filtered = templates.filter(t => t.id !== id);
+    this.saveTemplates(filtered);
+    return filtered;
+  }
+
+  // Stats management
+  getStats() {
+    return JSON.parse(localStorage.getItem(this.storageKeys.stats) || JSON.stringify({
       totalPosts: 0,
       general: 0,
       listing: 0,
@@ -14,8 +42,84 @@ class TelegramContentCreator {
       tips: 0,
       news: 0,
       announcement: 0,
-      educational: 0
+      educational: 0,
+      lastUpdated: new Date().toISOString()
+    }));
+  }
+
+  updateStats(type) {
+    const stats = this.getStats();
+    stats.totalPosts++;
+    if (stats[type] !== undefined) {
+      stats[type]++;
+    }
+    stats.lastUpdated = new Date().toISOString();
+    localStorage.setItem(this.storageKeys.stats, JSON.stringify(stats));
+    return stats;
+  }
+
+  // Form data management
+  getFormData() {
+    return JSON.parse(localStorage.getItem(this.storageKeys.formData) || '{}');
+  }
+
+  saveFormData(type, data) {
+    const formData = this.getFormData();
+    formData[type] = {
+      ...data,
+      timestamp: new Date().toISOString()
     };
+    localStorage.setItem(this.storageKeys.formData, JSON.stringify(formData));
+  }
+
+  clearFormData(type = null) {
+    if (type) {
+      const formData = this.getFormData();
+      delete formData[type];
+      localStorage.setItem(this.storageKeys.formData, JSON.stringify(formData));
+    } else {
+      localStorage.removeItem(this.storageKeys.formData);
+    }
+  }
+
+  // Auto-save functionality
+  autoSave(type, formElement) {
+    const inputs = formElement.querySelectorAll('input, select, textarea');
+    const data = {};
+    inputs.forEach(input => {
+      if (input.id) {
+        data[input.id] = input.value;
+      }
+    });
+    this.saveFormData(type, data);
+  }
+
+  // Restore form data
+  restoreFormData(type, formElement) {
+    const formData = this.getFormData();
+    if (formData[type]) {
+      Object.keys(formData[type]).forEach(key => {
+        if (key !== 'timestamp') {
+          const element = formElement.querySelector(`#${key}`);
+          if (element) {
+            element.value = formData[type][key];
+          }
+        }
+      });
+    }
+  }
+}
+
+// Telegram Content Creator - Multi-Purpose Content Creation Tool
+class TelegramContentCreator {
+  constructor() {
+    this.currentType = 'general';
+    this.backendUrl = 'https://taloon-studio-backoffice-23773ec9ff31.herokuapp.com/telegram/makePost';
+    this.uploadedImage = null;
+    this.cache = new CacheManager();
+    this.templates = this.cache.getTemplates();
+    this.stats = this.cache.getStats();
+    this.formData = this.cache.getFormData();
     this.init();
   }
 
@@ -25,6 +129,9 @@ class TelegramContentCreator {
     this.loadTemplates();
     this.updateStats();
     this.setupUrlDescriptionReader();
+    this.setupAutoSave();
+    this.restoreLastFormData();
+    this.updateFormStatus();
   }
 
   setupEventListeners() {
@@ -43,8 +150,105 @@ class TelegramContentCreator {
     document.getElementById('btnClear').addEventListener('click', () => this.clearForms());
     document.getElementById('btnSave').addEventListener('click', () => this.saveAsTemplate());
 
+    // New panel controls
+    document.getElementById('quickSave').addEventListener('click', () => this.quickSave());
+    document.getElementById('quickRestore').addEventListener('click', () => this.quickRestore());
+    document.getElementById('quickClear').addEventListener('click', () => this.quickClear());
+    document.getElementById('btnSaveTemplate').addEventListener('click', () => this.saveAsTemplate());
+    document.getElementById('btnRefreshTemplates').addEventListener('click', () => this.loadTemplates());
+
     // Image upload
     this.setupImageUpload();
+  }
+
+  setupAutoSave() {
+    // Auto-save form data on input changes
+    document.querySelectorAll('.content-form').forEach(form => {
+      const inputs = form.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        input.addEventListener('input', () => {
+          this.saveCurrentFormData();
+        });
+        input.addEventListener('change', () => {
+          this.saveCurrentFormData();
+        });
+      });
+    });
+  }
+
+  saveCurrentFormData() {
+    const currentForm = document.getElementById(`${this.currentType}Form`);
+    if (currentForm) {
+      const inputs = currentForm.querySelectorAll('input, select, textarea');
+      const data = {};
+      inputs.forEach(input => {
+        if (input.id) {
+          data[input.id] = input.value;
+        }
+      });
+      this.cache.saveFormData(this.currentType, data);
+      this.updateFormStatus();
+    }
+  }
+
+  updateFormStatus() {
+    const lastSavedElement = document.getElementById('lastSaved');
+    const autoSaveStatusElement = document.getElementById('autoSaveStatus');
+    
+    if (lastSavedElement) {
+      const formData = this.cache.getFormData()[this.currentType];
+      if (formData && formData.timestamp) {
+        const lastSaved = new Date(formData.timestamp);
+        const now = new Date();
+        const diffMinutes = Math.floor((now - lastSaved) / (1000 * 60));
+        
+        if (diffMinutes < 1) {
+          lastSavedElement.textContent = 'Just now';
+          lastSavedElement.className = 'status-value';
+        } else if (diffMinutes < 60) {
+          lastSavedElement.textContent = `${diffMinutes}m ago`;
+          lastSavedElement.className = 'status-value';
+        } else {
+          lastSavedElement.textContent = lastSaved.toLocaleTimeString();
+          lastSavedElement.className = 'status-value warning';
+        }
+      } else {
+        lastSavedElement.textContent = 'Never';
+        lastSavedElement.className = 'status-value error';
+      }
+    }
+    
+    if (autoSaveStatusElement) {
+      autoSaveStatusElement.textContent = 'Active';
+      autoSaveStatusElement.className = 'status-value';
+    }
+  }
+
+  quickSave() {
+    this.saveCurrentFormData();
+    this.showToast('✅ Form data saved!', 'success');
+  }
+
+  quickRestore() {
+    this.restoreLastFormData();
+    this.showToast('✅ Form data restored!', 'success');
+  }
+
+  quickClear() {
+    const currentForm = document.getElementById(`${this.currentType}Form`);
+    if (currentForm) {
+      currentForm.reset();
+      this.cache.clearFormData(this.currentType);
+      this.updateFormStatus();
+      this.showToast('✅ Form cleared!', 'success');
+    }
+  }
+
+  restoreLastFormData() {
+    const currentForm = document.getElementById(`${this.currentType}Form`);
+    if (currentForm) {
+      this.cache.restoreFormData(this.currentType, currentForm);
+    }
   }
 
   setupImageUpload() {
@@ -133,6 +337,9 @@ class TelegramContentCreator {
   }
 
   switchContentType(type) {
+    // Save current form data before switching
+    this.saveCurrentFormData();
+
     // Update active button
     document.querySelectorAll('.type-btn').forEach(btn => {
       btn.classList.remove('active');
@@ -145,6 +352,12 @@ class TelegramContentCreator {
     // Show/hide forms
     this.showForm(type);
     this.currentType = type;
+
+    // Restore form data for the new type
+    this.restoreLastFormData();
+
+    // Update form status
+    this.updateFormStatus();
 
     // Clear preview
     this.clearPreview();
@@ -636,11 +849,11 @@ class TelegramContentCreator {
       type: this.currentType,
       name: templateName,
       content: content,
+      formData: this.cache.getFormData()[this.currentType] || {},
       timestamp: new Date().toISOString()
     };
 
-    this.templates.push(template);
-    localStorage.setItem('telegramTemplates', JSON.stringify(this.templates));
+    this.templates = this.cache.addTemplate(template);
     this.loadTemplates();
     this.showToast('✅ Template saved successfully!', 'success');
   }
@@ -650,24 +863,41 @@ class TelegramContentCreator {
     if (!templatesContainer) return;
 
     if (this.templates.length === 0) {
-      templatesContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-style: italic; padding: 2rem 0;">No templates saved yet. Create content and save it as a template!</p>';
+      templatesContainer.innerHTML = `
+        <div class="templates-placeholder">
+          <i class="fas fa-save"></i>
+          <p>No templates saved yet</p>
+          <small>Create content and save as template</small>
+        </div>
+      `;
       return;
     }
 
-    let templatesHtml = '<h4 style="margin-bottom: 1rem; color: var(--text);">💾 Your Templates</h4>';
+    let templatesHtml = '';
     this.templates.forEach(template => {
+      const typeEmoji = this.getTypeEmoji(template.type);
+      const timeAgo = this.getTimeAgo(template.timestamp);
+      
       templatesHtml += `
-        <div style="background: var(--bg-light); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem;">
-            <span style="font-weight: 600; color: var(--text);">${template.name}</span>
-            <span style="background: var(--primary); color: white; padding: 0.2rem 0.5rem; border-radius: 0.3rem; font-size: 0.7rem; text-transform: uppercase;">${template.type}</span>
-            <span style="color: var(--text-muted); font-size: 0.8rem;">${new Date(template.timestamp).toLocaleDateString()}</span>
+        <div class="template-item">
+          <div class="template-header">
+            <div class="template-info">
+              <span class="template-name">${template.name}</span>
+              <span class="template-type">${typeEmoji} ${template.type}</span>
+            </div>
+            <span class="template-time">${timeAgo}</span>
           </div>
-          <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem; line-height: 1.4;">${template.content.substring(0, 100)}...</div>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button onclick="telegramContentCreator.loadTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s ease;">Load</button>
-            <button onclick="telegramContentCreator.copyTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--success); color: white; transition: all 0.2s ease;">Copy</button>
-            <button onclick="telegramContentCreator.deleteTemplate(${template.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border: none; border-radius: 0.3rem; cursor: pointer; background: var(--danger); color: white; transition: all 0.2s ease;">Delete</button>
+          <div class="template-preview">${template.content.substring(0, 80)}...</div>
+          <div class="template-actions">
+            <button class="template-btn load" onclick="telegramContentCreator.loadTemplate(${template.id})" title="Load template">
+              <i class="fas fa-upload"></i>
+            </button>
+            <button class="template-btn copy" onclick="telegramContentCreator.copyTemplate(${template.id})" title="Copy content">
+              <i class="fas fa-copy"></i>
+            </button>
+            <button class="template-btn delete" onclick="telegramContentCreator.deleteTemplate(${template.id})" title="Delete template">
+              <i class="fas fa-trash"></i>
+            </button>
           </div>
         </div>
       `;
@@ -676,16 +906,80 @@ class TelegramContentCreator {
     templatesContainer.innerHTML = templatesHtml;
   }
 
+  getTypeEmoji(type) {
+    const emojis = {
+      'general': '📝',
+      'listing': '🏠',
+      'market': '📊',
+      'tips': '💡',
+      'news': '📰',
+      'announcement': '📢',
+      'educational': '📚'
+    };
+    return emojis[type] || '📄';
+  }
+
+  getTimeAgo(timestamp) {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffMinutes = Math.floor((now - time) / (1000 * 60));
+    
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
+    return `${Math.floor(diffMinutes / 1440)}d ago`;
+  }
+
   loadTemplate(id) {
     const template = this.templates.find(t => t.id === id);
-    if (!template) return;
+    if (!template) {
+      this.showToast('❌ Template not found', 'error');
+      return;
+    }
+
+    console.log('Loading template:', template);
 
     // Switch to the correct content type
     this.switchContentType(template.type);
     
-    // For now, just show a success message
-    // In a full implementation, you'd populate the form fields
-    this.showToast('✅ Template loaded! (Form population would be implemented here)', 'success');
+    // Wait a bit for the form to be visible, then restore data
+    setTimeout(() => {
+      const form = document.getElementById(`${template.type}Form`);
+      console.log('Form found:', form);
+      
+      if (form) {
+        // Clear the form first
+        form.reset();
+        
+        // Restore form data from template
+        if (template.formData) {
+          console.log('Template form data:', template.formData);
+          
+          Object.keys(template.formData).forEach(key => {
+            if (key !== 'timestamp') {
+              const element = form.querySelector(`#${key}`);
+              console.log(`Looking for element #${key}:`, element);
+              
+              if (element) {
+                element.value = template.formData[key];
+                console.log(`Set ${key} to:`, template.formData[key]);
+                // Trigger change event to update any dependent elements
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }
+          });
+        } else {
+          console.log('No form data in template');
+        }
+        
+        // Update form status
+        this.updateFormStatus();
+        
+        this.showToast(`✅ Template "${template.name}" loaded successfully!`, 'success');
+      } else {
+        this.showToast('❌ Form not found', 'error');
+      }
+    }, 100);
   }
 
   copyTemplate(id) {
@@ -698,8 +992,7 @@ class TelegramContentCreator {
 
   deleteTemplate(id) {
     if (confirm('Are you sure you want to delete this template?')) {
-      this.templates = this.templates.filter(t => t.id !== id);
-      localStorage.setItem('telegramTemplates', JSON.stringify(this.templates));
+      this.templates = this.cache.deleteTemplate(id);
       this.loadTemplates();
       this.showToast('✅ Template deleted!', 'success');
     }
@@ -806,16 +1099,7 @@ class TelegramContentCreator {
         console.log('Backend response:', result);
         
         // Update stats
-        this.stats.totalPosts++;
-        switch (this.currentType) {
-          case 'general': this.stats.general++; break;
-          case 'listing': this.stats.listing++; break;
-          case 'market': this.stats.market++; break;
-          case 'tips': this.stats.tips++; break;
-          case 'news': this.stats.news++; break;
-          case 'announcement': this.stats.announcement++; break;
-          case 'educational': this.stats.educational++; break;
-        }
+        this.stats = this.cache.updateStats(this.currentType);
         this.updateStats();
       } else {
         const errorText = await response.text();
@@ -839,6 +1123,9 @@ class TelegramContentCreator {
 
     // Clear preview
     this.clearPreview();
+
+    // Clear cached form data
+    this.cache.clearFormData();
 
     // Show success message
     this.showToast('✅ All forms cleared', 'success');

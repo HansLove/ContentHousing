@@ -536,44 +536,98 @@
 
     <!-- Right Sidebar -->
     <aside class="sidebar">
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <div class="panel-header">
+          <h3>🎛️ Control Panel</h3>
+          <i class="fas fa-cog"></i>
+        </div>
+        <div class="control-content">
+          <div class="control-section">
+            <h4>Quick Actions</h4>
+            <div class="quick-actions">
+              <button class="quick-btn" id="quickSave" title="Auto-save current form">
+                <i class="fas fa-save"></i>
+                <span>Auto-Save</span>
+              </button>
+              <button class="quick-btn" id="quickRestore" title="Restore last saved data">
+                <i class="fas fa-undo"></i>
+                <span>Restore</span>
+              </button>
+              <button class="quick-btn" id="quickClear" title="Clear current form">
+                <i class="fas fa-trash"></i>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="control-section">
+            <h4>Form Status</h4>
+            <div class="form-status" id="formStatus">
+              <div class="status-item">
+                <span class="status-label">Auto-save:</span>
+                <span class="status-value" id="autoSaveStatus">Active</span>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Last saved:</span>
+                <span class="status-value" id="lastSaved">Never</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Preview Panel -->
       <div class="preview-panel">
         <div class="preview-header">
-          <h3>Preview</h3>
-          <span class="preview-type" id="previewType">General Post</span>
+          <h3>👁️ Preview</h3>
+          <div class="preview-controls">
+            <span class="preview-type" id="previewType">General Post</span>
+            <button class="preview-btn" id="btnPreview" title="Generate preview">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
         </div>
         <div class="preview-content" id="previewContent">
           <div class="preview-placeholder">
             <i class="fas fa-eye"></i>
-            <p>Click "Preview" to see your content</p>
+            <p>Click preview to see your content</p>
           </div>
         </div>
       </div>
 
-      <!-- Saved Templates Panel -->
+      <!-- Templates Panel -->
       <div class="templates-panel">
         <div class="panel-header">
-          <h3>💾 Saved Templates</h3>
-          <i class="fas fa-save"></i>
+          <h3>💾 Templates</h3>
+          <div class="panel-controls">
+            <button class="panel-btn" id="btnSaveTemplate" title="Save current as template">
+              <i class="fas fa-plus"></i>
+            </button>
+            <button class="panel-btn" id="btnRefreshTemplates" title="Refresh templates">
+              <i class="fas fa-sync"></i>
+            </button>
+          </div>
         </div>
         <div class="templates-content" id="templatesContainer">
           <div class="templates-placeholder">
             <i class="fas fa-save"></i>
-            <p>Save your favorite content as templates</p>
+            <p>No templates saved yet</p>
+            <small>Create content and save as template</small>
           </div>
         </div>
       </div>
 
-      <!-- Quick Stats Panel -->
+      <!-- Stats Panel -->
       <div class="stats-panel">
         <div class="panel-header">
-          <h3>📊 Quick Stats</h3>
-          <i class="fas fa-chart-bar"></i>
+          <h3>📊 Analytics</h3>
+          <i class="fas fa-chart-line"></i>
         </div>
         <div class="stats-content" id="statsContent">
           <div class="stats-placeholder">
             <i class="fas fa-chart-bar"></i>
-            <p>Content statistics will appear here</p>
+            <p>Statistics will appear here</p>
           </div>
         </div>
       </div>
