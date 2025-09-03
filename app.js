@@ -2,7 +2,8 @@
 class TelegramContentCreator {
   constructor() {
     this.currentType = 'general';
-    this.backendUrl = 'http://localhost:3002/telegram/makePost';
+    // this.backendUrl = 'http://localhost:3002/telegram/makePost';
+    this.backendUrl = 'https://taloon-studio-backoffice-23773ec9ff31.herokuapp.com/telegram/makePost';
     this.uploadedImage = null;
     this.templates = JSON.parse(localStorage.getItem('telegramTemplates') || '[]');
     this.stats = {
@@ -191,7 +192,7 @@ class TelegramContentCreator {
       // Store chat_id for Telegram posting
       this.chat_id = chat_id;
       this.showToast('✅ Chat ID detected for Telegram posting', 'info');
-      this.showChatIdIndicator();
+      this.showChatIdIndicator(chat_id);
     }
   }
 
@@ -843,10 +844,15 @@ class TelegramContentCreator {
     this.showToast('✅ All forms cleared', 'success');
   }
 
-  showChatIdIndicator() {
+  showChatIdIndicator(chat_id) {
     const indicator = document.getElementById('chatIdIndicator');
     if (indicator) {
       indicator.style.display = 'flex';
+      indicator.innerHTML = `
+        <i class="fas fa-telegram"></i>
+        <span>Chat ID detected - Ready for direct posting</span>
+      `;
+      indicator.setAttribute('data-chat-id', chat_id);
     }
   }
 
