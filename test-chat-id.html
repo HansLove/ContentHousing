@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chat ID Functionality</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-link {
+            display: block;
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #2563eb;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .test-link:hover {
+            border-color: #2563eb;
+            background: #f8fafc;
+        }
+        .description {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        h1 {
+            color: #1e293b;
+            text-align: center;
+        }
+        .info {
+            background: #e0f2fe;
+            border: 1px solid #0891b2;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Chat ID Functionality</h1>
+    
+    <div class="info">
+        <strong>📋 How to test:</strong><br>
+        1. Click any link below to open the Telegram Content Creator with different URL parameters<br>
+        2. Notice how the chat ID indicator appears when a chat_id is provided<br>
+        3. Create content and use "Send to Telegram" to see the chat_id in the payload
+    </div>
+
+    <a href="index.html" class="test-link">
+        <strong>🔗 Basic Test</strong>
+        <div class="description">Open without any URL parameters</div>
+    </a>
+
+    <a href="index.html?description=This is a test description from URL" class="test-link">
+        <strong>📝 Description Only</strong>
+        <div class="description">Pre-populates description field</div>
+    </a>
+
+    <a href="index.html?chat_id=-1001234567890" class="test-link">
+        <strong>💬 Chat ID Only</strong>
+        <div class="description">Shows chat ID indicator and enables direct posting</div>
+    </a>
+
+    <a href="index.html?description=Test content&chat_id=-1001234567890&url=https://example.com" class="test-link">
+        <strong>🎯 Full Integration Test</strong>
+        <div class="description">All parameters: description, chat_id, and source URL</div>
+    </a>
+
+    <a href="index.html?description=Real estate listing&chat_id=-1009876543210" class="test-link">
+        <strong>🏠 Real Estate Test</strong>
+        <div class="description">Test with real estate content and specific chat ID</div>
+    </a>
+
+    <div class="info">
+        <strong>🔧 Backend Payload Example:</strong><br>
+        When you click "Send to Telegram", your backend will receive:<br>
+        <pre style="background: #f1f5f9; padding: 10px; border-radius: 4px; margin-top: 10px;">
+{
+  "message": "📢 Your formatted content here...",
+  "chat_id": "-1001234567890",
+  "image": "base64-image-data-if-uploaded",
+  "imageName": "filename.jpg",
+  "imageType": "image/jpeg"
+}</pre>
+    </div>
+</body>
+</html>

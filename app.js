@@ -167,6 +167,7 @@ class TelegramContentCreator {
     const urlParams = new URLSearchParams(window.location.search);
     const description = urlParams.get("description");
     const url = urlParams.get("url");
+    const chat_id = urlParams.get("chat_id");
 
     if (description) {
       // Try to populate description in the current form
@@ -184,6 +185,13 @@ class TelegramContentCreator {
       // Store URL for reference
       this.sourceUrl = url;
       this.showToast('✅ Source URL detected', 'info');
+    }
+
+    if (chat_id) {
+      // Store chat_id for Telegram posting
+      this.chat_id = chat_id;
+      this.showToast('✅ Chat ID detected for Telegram posting', 'info');
+      this.showChatIdIndicator();
     }
   }
 
@@ -770,6 +778,11 @@ class TelegramContentCreator {
         message: message
       };
 
+      // Add chat_id if available from URL parameter
+      if (this.chat_id) {
+        payload.chat_id = this.chat_id;
+      }
+
       if (this.uploadedImage) {
         payload.image = this.uploadedImage.base64;
         payload.imageName = this.uploadedImage.file.name;
@@ -828,6 +841,13 @@ class TelegramContentCreator {
 
     // Show success message
     this.showToast('✅ All forms cleared', 'success');
+  }
+
+  showChatIdIndicator() {
+    const indicator = document.getElementById('chatIdIndicator');
+    if (indicator) {
+      indicator.style.display = 'flex';
+    }
   }
 
   showToast(message, type = 'info') {
@@ -898,16 +918,7 @@ function populateSampleData() {
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Read URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const description = urlParams.get("description");
-
-  // 2. Set the description field if the parameter exists
-  if (description) {
-    const descriptionField = document.getElementById("listingDescription");
-    if (descriptionField) {
-      descriptionField.value = description;
-    }
-  }
+  // URL parameter handling is now done in the main class setupUrlDescriptionReader method
 
   // 3. Handle image upload preview
   const imageUpload = document.getElementById("imageUpload");
@@ -940,15 +951,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sendButton) {
     sendButton.addEventListener("click", () => {
       const description = document.getElementById("listingDescription").value;
+      const generalContent = document.getElementById("generalContent").value;
       const imageFile = imageUpload.files[0];
 
-      if (!description) {
+      if (!description&&!generalContent) {
         alert("Please add a description before sending.");
         return;
       }
 
       const formData = new FormData();
-      formData.append("description", description);
+      formData.append("description", description||generalContent);
       if (imageFile) {
         formData.append("image", imageFile);
       }
@@ -965,7 +977,8 @@ document.addEventListener("DOMContentLoaded", () => {
           if (data.ok) {
             alert("Content sent to Telegram successfully!");
           } else {
-            alert("Failed to send content to Telegram.");
+            // alert("Failed to send content to Telegram.");
+            console.error("Failed to send content to Telegram.");
           }
         })
         .catch((error) => {

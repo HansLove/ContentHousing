@@ -71,6 +71,7 @@ Drag and drop or click to upload photos, charts, or other relevant images
 The tool automatically reads URL parameters to help with content creation:
 - Add `?description=Your content here` to pre-populate description fields
 - Add `?url=source-url` to track content sources
+- Add `?chat_id=your-telegram-chat-id` to enable direct posting to specific Telegram chats
 - Perfect for integrating with other tools and workflows
 
 ## 🎨 Content Formatting
@@ -103,6 +104,17 @@ Track your content creation:
 To enable direct Telegram posting, configure your backend URL in `app.js`:
 ```javascript
 this.backendUrl = 'http://your-backend-url/telegram/makePost';
+```
+
+The tool sends the following payload to your backend:
+```javascript
+{
+  message: "formatted content",
+  chat_id: "telegram-chat-id", // if provided via URL parameter
+  image: "base64-image-data", // if image is uploaded
+  imageName: "filename.jpg",
+  imageType: "image/jpeg"
+}
 ```
 
 ### Styling
